@@ -4,6 +4,9 @@
   "private": true,
   "dependencies": {
     "@apollo/react-hooks": "^4.0.0",
+    "@testing-library/dom": "^8.0.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "12.1.2",
     "@types/node": "^12.0.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
@@ -42,5 +45,10 @@
   "devDependencies": {
     "@types/jest": "^26.0.15",
     "react-scripts": "4.0.3"
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "react-markdown": "<rootDir>/node_modules/react-markdown/react-markdown.min.js"
+    }
   }
 }
