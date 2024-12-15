@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { Nav } from '../components';
 import { Home, ListPage } from '../screens';
 import { createUseStyles } from 'react-jss';
-import { Test } from './Test';
+import { PokemonDialog } from '../components/PokemonDialog';
 
 export const MainLayout = () => {
   const classes = useStyles();
@@ -14,7 +14,12 @@ export const MainLayout = () => {
         <div className={classes.scrollableArea}>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/pokemon" element={<ListPage />} />
+            <Route path="/pokemon" element={<ListPage />}>
+              <Route
+                path=":pokemonId/:pokemonName"
+                element={<PokemonDialog />}
+              />
+            </Route>
           </Routes>
         </div>
       </div>

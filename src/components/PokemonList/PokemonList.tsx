@@ -4,6 +4,7 @@ import { useGetPokemons } from '../../hooks/useGetPokemons';
 import { SearchBar } from '../SearchBar';
 import { PokemonTable } from '../PokemonTable';
 import { getFilteredPokemon } from './helper';
+import { Outlet } from 'react-router-dom';
 
 export const PokemonList = () => {
   const classes = useStyles();
@@ -57,6 +58,7 @@ export const PokemonList = () => {
       ) : (
         <PokemonTable pokemons={filteredPokemons} />
       )}
+      <Outlet />
     </div>
   );
 };

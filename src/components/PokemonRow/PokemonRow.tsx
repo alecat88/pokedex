@@ -1,7 +1,8 @@
 import { createUseStyles } from 'react-jss';
 import { Pokemon } from '../../hooks/useGetPokemons';
+import { useNavigate } from 'react-router-dom';
 /*
-  A tradeoff was made at line 21:  style={{ display: pokemon?.isVisible ? 'table-row' : 'none' }}
+  A tradeoff was made at line 26:  style={{ display: pokemon?.isVisible ? 'table-row' : 'none' }}
   
   The choice of using the 'display' css value was made because in this way the main table won't suffer from a 
   sluggish UI experience because of slow image rendering when filtering the pokemons thought the search bar 
@@ -12,13 +13,18 @@ export const PokemonRow = ({
 }: {
   pokemon: Pokemon & { isVisible?: boolean };
 }) => {
+  const navigate = useNavigate();
+
+  const handleOnRowClick = () => {
+    navigate(`/pokemon/${pokemon.id}/${pokemon.name}`);
+  };
   const classes = useStyles();
   return (
     <tr
-      key={pokemon.id}
       className={classes.row}
       role="row"
       style={{ display: pokemon?.isVisible ? 'table-row' : 'none' }}
+      onClick={handleOnRowClick}
     >
       <td className="name" role="cell">
         {pokemon.name}
@@ -45,7 +51,9 @@ const useStyles = createUseStyles(
       alignItems: 'center',
     },
     image: {
-      width: '50px',
+      maxWidth: '50px',
+      maxHeight: '50px',
+      width: 'auto',
     },
   },
   { name: 'PokemonRow' }

@@ -1,28 +1,11 @@
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { MockedProvider } from '@apollo/client/testing';
 import { chance, createPokemon, createPokemons } from '../utils';
 import { MainLayout } from '../../app/MainLayout';
-import { MOCKED_GET_POKEMONS } from './helpers';
 import userEvent from '@testing-library/user-event';
 import { Pokemon } from '../../hooks/useGetPokemons';
-import { Children } from 'react';
-
-const mockGetPokemonsQuery = (pokemons: Pokemon[]) => [
-  {
-    request: {
-      query: MOCKED_GET_POKEMONS,
-      variables: {
-        first: 151,
-      },
-    },
-    result: {
-      data: {
-        pokemons,
-      },
-    },
-  },
-];
+import { mockGetPokemonsQuery } from '../mockAPI';
 
 describe('When the url is /pokemon', () => {
   const route = '/pokemon';
@@ -32,7 +15,7 @@ describe('When the url is /pokemon', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       mockedPokemons = createPokemons();
-      const mocks = mockGetPokemonsQuery(mockedPokemons);
+      const mocks = [mockGetPokemonsQuery(mockedPokemons)];
       render(
         <MockedProvider mocks={mocks} addTypename={false}>
           <MemoryRouter initialEntries={[route]}>
@@ -80,100 +63,116 @@ describe('When the url is /pokemon', () => {
   });
 
   describe.each([
-    {
-      description: 'a string that should match no pokemon',
+    [
+      'no pokemon',
+      {
+        getTestData: () => ({
+          stringToType: 'NOTHING TO SHOW',
+          mockedPokemons: createPokemons(),
+          expectedResult: [],
+        }),
+      },
+    ],
+    [
+      'a pokemon by name',
+      {
+        getTestData: () => {
+          const bulbasaur = createPokemon({ name: 'Bulbasaur' });
+          return {
+            expectedResult: [bulbasaur],
+            stringToType: 'Bulbasaur',
+            mockedPokemons: [bulbasaur, ...createPokemons()],
+          };
+        },
+      },
+    ],
+    [
+      'a pokemon by name (lowercase)',
+      {
+        getTestData: () => {
+          const bulbasaur = createPokemon({ name: 'Bulbasaur' });
+          return {
+            expectedResult: [bulbasaur],
+            stringToType: 'bulbasaur',
+            mockedPokemons: [bulbasaur, ...createPokemons()],
+          };
+        },
+      },
+    ],
 
-      getTestData: () => ({
-        stringToType: 'NOTHING TO SHOW',
-        mockedPokemons: createPokemons(),
-        expectedResult: [],
-      }),
-    },
-    {
-      description: 'a string that match a pokemon by name',
-      getTestData: () => {
-        const bulbasaur = createPokemon({ name: 'Bulbasaur' });
-        return {
-          expectedResult: [bulbasaur],
-          stringToType: 'Bulbasaur',
-          mockedPokemons: [bulbasaur, ...createPokemons()],
-        };
+    [
+      'a pokemon by name (uppercase)',
+      {
+        getTestData: () => {
+          const bulbasaur = createPokemon({ name: 'Bulbasaur' });
+          return {
+            expectedResult: [bulbasaur],
+            stringToType: 'BULBASAUR',
+            mockedPokemons: [bulbasaur, ...createPokemons()],
+          };
+        },
       },
-    },
-    {
-      description: 'a string that match a pokemon by name (lowercase)',
-      getTestData: () => {
-        const bulbasaur = createPokemon({ name: 'Bulbasaur' });
-        return {
-          expectedResult: [bulbasaur],
-          stringToType: 'bulbasaur',
-          mockedPokemons: [bulbasaur, ...createPokemons()],
-        };
+    ],
+    [
+      'a pokemon by name (substring)',
+      {
+        getTestData: () => {
+          const bulbasaur = createPokemon({ name: 'Bulbasaur' });
+          return {
+            expectedResult: [bulbasaur],
+            stringToType: 'ulbasau',
+            mockedPokemons: [bulbasaur, ...createPokemons()],
+          };
+        },
       },
-    },
-    {
-      description: 'a string that match a pokemon by name (uppercase)',
-      getTestData: () => {
-        const bulbasaur = createPokemon({ name: 'Bulbasaur' });
-        return {
-          expectedResult: [bulbasaur],
-          stringToType: 'BULBASAUR',
-          mockedPokemons: [bulbasaur, ...createPokemons()],
-        };
+    ],
+    [
+      'multiple pokemons by name',
+      {
+        getTestData: () => {
+          const bulbasaur = createPokemon({ name: 'Bulbasaur' });
+          const venusaur = createPokemon({ name: 'Venusaur' });
+          return {
+            expectedResult: [bulbasaur, venusaur],
+            stringToType: 'saur',
+            mockedPokemons: [bulbasaur, ...createPokemons(), venusaur],
+          };
+        },
       },
-    },
-    {
-      description: 'a string that match a pokemon by name (substring)',
-      getTestData: () => {
-        const bulbasaur = createPokemon({ name: 'Bulbasaur' });
-        return {
-          expectedResult: [bulbasaur],
-          stringToType: 'ulbasau',
-          mockedPokemons: [bulbasaur, ...createPokemons()],
-        };
+    ],
+    [
+      'a pokemon by number',
+      {
+        getTestData: () => {
+          const randomPokemon = createPokemon();
+          return {
+            expectedResult: [randomPokemon],
+            stringToType: randomPokemon.number,
+            mockedPokemons: [randomPokemon, ...createPokemons()],
+          };
+        },
       },
-    },
-    {
-      description: 'a string that matches multiple pokemons by name',
-      getTestData: () => {
-        const bulbasaur = createPokemon({ name: 'Bulbasaur' });
-        const venusaur = createPokemon({ name: 'Venusaur' });
-        return {
-          expectedResult: [bulbasaur, venusaur],
-          stringToType: 'saur',
-          mockedPokemons: [bulbasaur, ...createPokemons(), venusaur],
-        };
+    ],
+    [
+      'a pokemon by type',
+      {
+        getTestData: () => {
+          const randomPokemon = createPokemon();
+          return {
+            expectedResult: [randomPokemon],
+            stringToType: chance.pickone(randomPokemon.types),
+            mockedPokemons: [randomPokemon, ...createPokemons()],
+          };
+        },
       },
-    },
-    {
-      description: 'a string that match a pokemon by number',
-      getTestData: () => {
-        const randomPokemon = createPokemon();
-        return {
-          expectedResult: [randomPokemon],
-          stringToType: randomPokemon.number,
-          mockedPokemons: [randomPokemon, ...createPokemons()],
-        };
-      },
-    },
-    {
-      description: 'a string that match a pokemon by type',
-      getTestData: () => {
-        const randomPokemon = createPokemon();
-        return {
-          expectedResult: [randomPokemon],
-          stringToType: chance.pickone(randomPokemon.types),
-          mockedPokemons: [randomPokemon, ...createPokemons()],
-        };
-      },
-    },
-  ])('When the user type $description', ({ getTestData }) => {
+    ],
+  ])('When the user types a string that matches %s', (_, { getTestData }) => {
     let searchResult: Pokemon[];
     beforeEach(async () => {
       jest.resetAllMocks();
       const { mockedPokemons, stringToType, expectedResult } = getTestData();
       searchResult = expectedResult;
-      const mocks = mockGetPokemonsQuery(mockedPokemons);
+      const mocks = [mockGetPokemonsQuery(mockedPokemons)];
       render(
         <MockedProvider mocks={mocks} addTypename={false}>
           <MemoryRouter initialEntries={[route]}>
