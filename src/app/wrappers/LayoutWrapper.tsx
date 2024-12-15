@@ -5,7 +5,9 @@ import { createUseStyles } from 'react-jss';
 
 export const LayoutWrapper = () => {
   const classes = useStyles();
-
+  /*
+  Components have been separated to follow SRP from solid principle and to enable integration testing with Route mocks.
+  */
   return (
     <LayoutProvider>
       <div className={classes.root}>

@@ -2,11 +2,11 @@ import Chance from 'chance';
 
 export const chance = new Chance();
 
-export const createPokemon = () => ({
+export const createPokemon = ({name, number, types} : {name?: string, number?: string, types?: string[]} = {}) => ({
     id: chance.string(),
-    name: chance.word(),
-    number: chance.string({ numeric: true }),
-    types: Array.from({ length: chance.natural({ min: 1, max: 4 }) }, () =>
+    name: name ?? chance.word(),
+    number: number ?? chance.string({ numeric: true }),
+    types: types ?? Array.from({ length: chance.natural({ min: 1, max: 4 }) }, () =>
       chance.word()
     ),
     image: chance.url()
